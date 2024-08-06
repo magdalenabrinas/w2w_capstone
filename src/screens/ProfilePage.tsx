@@ -140,7 +140,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>🌄 React Native Image Picker</Text>
+      <Text style={styles.title}>React Native Image Picker</Text>
       <ScrollView>
         <View style={styles.buttonContainer}>
           {actions.map(({ title, type, options }) => (
