@@ -80,7 +80,6 @@
 
 // };
 // };
-
 import * as React from 'react';
 import {
   Image,
@@ -89,50 +88,83 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  Text,
+  TouchableOpacity
 } from 'react-native';
-import {DemoButton, DemoResponse, DemoTitle} from './components';
-
 import * as ImagePicker from 'react-native-image-picker';
 
 /* toggle includeExtra */
 const includeExtra = true;
 
+interface Action {
+  title: string;
+  type: 'capture' | 'library';
+  options: ImagePicker.ImageLibraryOptions;
+}
+
+const actions: Action[] = [
+  {
+    title: 'Select Image',
+    type: 'library',
+    options: {
+      selectionLimit: 0,
+      mediaType: 'photo',
+      includeBase64: false,
+      includeExtra,
+    },
+  },
+  
+  {
+    title: 'Select Video',
+    type: 'library',
+    options: {
+      selectionLimit: 0,
+      mediaType: 'video',
+      formatAsMp4: true,
+      includeExtra,
+    },
+  },
+  
+];
+
+
 export default function App() {
   const [response, setResponse] = React.useState<any>(null);
 
-  const onButtonPress = React.useCallback((type, options) => {
-    if (type === 'capture') {
-      ImagePicker.launchCamera(options, setResponse);
-    } else {
+  const onButtonPress = React.useCallback((type: string, options: ImagePicker.ImageLibraryOptions) => {
+    if (type === 'libary') {
       ImagePicker.launchImageLibrary(options, setResponse);
+    } else {
     }
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <DemoTitle>🌄 React Native Image Picker</DemoTitle>
+      <Text style={styles.title}>🌄 React Native Image Picker</Text>
       <ScrollView>
         <View style={styles.buttonContainer}>
-          {actions.map(({title, type, options}) => {
-            return (
-              <DemoButton
-                key={title}
-                onPress={() => onButtonPress(type, options)}>
-                {title}
-              </DemoButton>
-            );
-          })}
+          {actions.map(({ title, type, options }) => (
+            <TouchableOpacity
+              key={title}
+              onPress={() => onButtonPress(type, options)}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>{title}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-        <DemoResponse>{response}</DemoResponse>
+        <View style={styles.responseContainer}>
+          <Text style={styles.responseText}>{JSON.stringify(response, null, 2)}</Text>
+        </View>
 
         {response?.assets &&
-          response?.assets.map(({uri}: {uri: string}) => (
+          response?.assets.map(({ uri }: { uri: string }) => (
             <View key={uri} style={styles.imageContainer}>
               <Image
                 resizeMode="cover"
                 resizeMethod="scale"
                 style={styles.image}
-                source={{uri: uri}}
+                source={{ uri: uri }}
               />
             </View>
           ))}
@@ -146,10 +178,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'aliceblue',
   },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
   buttonContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'center',
     marginVertical: 8,
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    margin: 5,
+    alignItems: 'center',
+    minWidth: 120,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  responseContainer: {
+    marginVertical: 20,
+    paddingHorizontal: 10,
+  },
+  responseText: {
+    fontSize: 14,
+    color: '#333',
   },
   imageContainer: {
     marginVertical: 24,
@@ -160,76 +219,3 @@ const styles = StyleSheet.create({
     height: 200,
   },
 });
-
-interface Action {
-  title: string;
-  type: 'capture' | 'library';
-  options: ImagePicker.CameraOptions | ImagePicker.ImageLibraryOptions;
-}
-
-const actions: Action[] = [
-  {
-    title: 'Take Image',
-    type: 'capture',
-    options: {
-      saveToPhotos: true,
-      mediaType: 'photo',
-      includeBase64: false,
-      includeExtra,
-    },
-  },
-  {
-    title: 'Select Image',
-    type: 'library',
-    options: {
-      selectionLimit: 0,
-      mediaType: 'photo',
-      includeBase64: false,
-      includeExtra,
-    },
-  },
-  {
-    title: 'Take Video',
-    type: 'capture',
-    options: {
-      saveToPhotos: true,
-      formatAsMp4: true,
-      mediaType: 'video',
-      includeExtra,
-    },
-  },
-  {
-    title: 'Select Video',
-    type: 'library',
-    options: {
-      selectionLimit: 0,
-      mediaType: 'video',
-      formatAsMp4: true,
-      includeExtra,
-    },
-  },
-  {
-    title: 'Select Image or Video\n(mixed)',
-    type: 'library',
-    options: {
-      selectionLimit: 0,
-      mediaType: 'mixed',
-      includeExtra,
-    },
-  },
-];
-
-if (Platform.OS === 'ios') {
-  actions.push({
-    title: 'Take Image or Video\n(mixed)',
-    type: 'capture',
-    options: {
-      saveToPhotos: true,
-      mediaType: 'mixed',
-      includeExtra,
-      presentationStyle: 'fullScreen',
-    },
-  });
-}
-
-
